@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-azul-600: #011d4c;
+  --color-azul-900: #011332;
+  --color-azul-800: #022664;
+  --color-azul-500: #045ffb;
+  --color-laranja-500: #fd6f03;
+  --color-laranja-400: #fd8c35;
+  --color-laranja-800: #fda968;
+  --color-laranja-300: #fda968;
+  --color-branca: #5c5c5c;
+  --font-dunbar: "dunbar-tall", sans-serif;
+}
