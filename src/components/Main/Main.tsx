@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 function Main() {
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center text-white overflow-hidden">
@@ -25,10 +26,11 @@ function Main() {
           comunidade de forma rápida e eficiente. Junte-se a nós para melhorar a
           qualidade de vida em seu bairro.
         </p>
-
-        <button className="px-8 py-3 bg-laranja-500 text-white font-medium rounded-full hover:bg-laranja-600 transition-colors">
-          Cadastre seu Primeiro Pedido
-        </button>
+        <Link to="/cadastrar-pedido">
+          <button className="cursor-pointer px-8 py-3 bg-laranja-500 text-white font-medium rounded-full hover:bg-laranja-600 hover:text-azul-500 hover:font-bold transition-colors">
+            Cadastre seu Primeiro Pedido
+          </button>
+        </Link>
       </div>
     </main>
   );
