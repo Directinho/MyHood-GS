@@ -67,28 +67,6 @@ function Dashboard() {
           </div>
         </header>
 
-        <section
-          aria-label="Resumo dos pedidos"
-          className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {[
-            { titulo: "Total", valor: pedidos.length },
-            { titulo: "Em análise", valor: emAnalise },
-            { titulo: "Em andamento", valor: emAndamento },
-            { titulo: "Concluídos", valor: concluidos },
-          ].map(({ titulo, valor }) => (
-            <article
-              key={titulo}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <h2 className="text-sm font-medium text-slate-600">{titulo}</h2>
-              <p className="mt-2 text-3xl font-bold text-azul-900">
-                {loading ? "—" : valor}
-              </p>
-            </article>
-          ))}
-        </section>
-
         <section className="rounded-xl border border-slate-200 bg-blue-200 p-4 shadow-sm sm:p-6">
           <div className="mb-5">
             <h2 className="text-xl font-bold text-azul-600 sm:text-2xl">

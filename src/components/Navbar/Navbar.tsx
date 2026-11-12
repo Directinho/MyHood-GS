@@ -8,7 +8,7 @@ function Navbar() {
           <Link to="/" className="group flex items-center gap-2 self-center sm:self-auto">
             <div className="rounded-full p-1 transition-all duration-300 hover:bg-white/20 group-hover:scale-105">
               <img
-                src="/src/assets/favicon.png"
+                src="public/favicon.png"
                 alt="Logo MyHood"
                 className="h-10 w-10 rounded-full drop-shadow-lg"
               />
