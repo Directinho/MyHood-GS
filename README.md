@@ -29,10 +29,12 @@ npm run build
 
 ## API e persistência de demonstração
 
-O serviço usa `https://dummyjson.com/users` para apresentar exemplos fictícios
-de pessoas e `https://dummyjson.com/products` para demonstrar gravações:
+O serviço usa `https://dummyjson.com/users` para carregar a quantidade de
+exemplos fictícios de pessoas brasileiras e `https://dummyjson.com/products`
+para demonstrar gravações:
 
-- `GET /users` carrega nomes e cidades fictícios para os exemplos no dashboard.
+- `GET /users` fornece os registros-base; os nomes e cidades exibidos são
+  exemplos fictícios brasileiros definidos pela aplicação.
 - `POST /products/add` cria um pedido.
 - `PUT /products/{id}` atualiza um pedido.
 - `DELETE /products/{id}` remove um pedido.

@@ -7,12 +7,6 @@ const PRODUTO_REFERENCIA_DEMO_ID = 1;
 
 interface UsuarioApi {
   id: number;
-  firstName: string;
-  lastName: string;
-  address?: {
-    city?: string;
-    state?: string;
-  };
 }
 
 interface ProdutoApi {
@@ -137,8 +131,8 @@ function isUsuarioApi(value: unknown): value is UsuarioApi {
   return (
     isRecord(value) &&
     typeof value.id === "number" &&
-    typeof value.firstName === "string" &&
-    typeof value.lastName === "string"
+    Number.isInteger(value.id) &&
+    value.id > 0
   );
 }
 
@@ -150,6 +144,19 @@ function isListaUsuariosApi(value: unknown): value is ListaUsuariosApi {
   );
 }
 
+const pessoasBrasileiras = [
+  { nome: "Ana Souza", cidade: "São Paulo - SP" },
+  { nome: "João Oliveira", cidade: "Rio de Janeiro - RJ" },
+  { nome: "Maria Santos", cidade: "Belo Horizonte - MG" },
+  { nome: "Pedro Costa", cidade: "Curitiba - PR" },
+  { nome: "Júlia Almeida", cidade: "Salvador - BA" },
+  { nome: "Lucas Ferreira", cidade: "Recife - PE" },
+  { nome: "Beatriz Lima", cidade: "Porto Alegre - RS" },
+  { nome: "Gabriel Rodrigues", cidade: "Fortaleza - CE" },
+  { nome: "Larissa Martins", cidade: "Manaus - AM" },
+  { nome: "Rafael Pereira", cidade: "Goiânia - GO" },
+];
+
 const problemasDeExemplo = [
   "Buraco na via pública",
   "Manutenção da iluminação",
@@ -159,18 +166,17 @@ const problemasDeExemplo = [
 ];
 
 function mapearUsuarioParaExemplo(usuario: UsuarioApi): Pedido {
-  const localidade = [usuario.address?.city, usuario.address?.state]
-    .filter(Boolean)
-    .join(" - ");
+  const indicePessoa = (usuario.id - 1) % pessoasBrasileiras.length;
+  const pessoa = pessoasBrasileiras[indicePessoa];
 
   return {
     id: -usuario.id,
-    nome: `${usuario.firstName} ${usuario.lastName}`,
+    nome: pessoa.nome,
     cpf: "Não informado",
     nivel: (usuario.id % 5) + 1,
     pedido: problemasDeExemplo[(usuario.id - 1) % problemasDeExemplo.length],
     cep: "Não informado",
-    cidade: localidade || "Localidade fictícia",
+    cidade: pessoa.cidade,
     status: "Em análise",
     exemplo: true,
   };
@@ -198,7 +204,7 @@ function mesclarPedidos(cache: CachePedidos): Pedido[] {
 export async function getPedidos(): Promise<Pedido[]> {
   const [data, cache] = await Promise.all([
     requisitar<ListaUsuariosApi>(
-      `${USERS_API_URL}?limit=30`,
+      `${USERS_API_URL}?limit=${pessoasBrasileiras.length}`,
       undefined,
       isListaUsuariosApi,
     ),
