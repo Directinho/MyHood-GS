@@ -1,188 +1,33 @@
-import { useState, FormEvent } from "react";
-import Navbar from "../../components/Navbar/Navbar";
-import { createPedido } from "../../services/api";
-import type { Pedido } from "../../services/Pedido";
-
-interface FormData {
-  nome: string;
-  cpf: string;
-  nivel: number;
-  pedido: string;
-  cep: string;
-  cidade: string;
-}
-
-interface PularFields {
-  nome: boolean;
-  cpf: boolean;
-  pedido: boolean;
-  cep: boolean;
-}
+import { Link } from "react-router-dom";
+import { useCadastroPedido } from "../../hooks/useCadastroPedido";
 
 export default function CadastrarPedido() {
-  const [form, setForm] = useState<FormData>({
-    nome: "",
-    cpf: "",
-    nivel: 3,
-    pedido: "",
-    cep: "",
-    cidade: "",
-  });
-
-  const [pular, setPular] = useState<PularFields>({
-    nome: false,
-    cpf: false,
-    pedido: false,
-    cep: false,
-  });
-
-  const [loadingCep, setLoadingCep] = useState(false);
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [mensagem, setMensagem] = useState<{
-    tipo: "sucesso" | "erro";
-    texto: string;
-  } | null>(null);
-
-  function handleChange(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "nivel" ? Number(value) : value,
-    }));
-  }
-
-  function handlePular(campo: keyof PularFields) {
-    setPular((prev) => {
-      const novoValor = !prev[campo];
-
-      if (novoValor) {
-        setForm((f) => ({
-          ...f,
-          [campo]: "Não informado",
-          ...(campo === "cep" ? { cidade: "Não informado" } : {}),
-        }));
-      } else {
-        setForm((f) => ({
-          ...f,
-          [campo]: "",
-          ...(campo === "cep" ? { cidade: "" } : {}),
-        }));
-      }
-
-      return { ...prev, [campo]: novoValor };
-    });
-  }
-
-  async function buscarCep() {
-    if (pular.cep) return;
-
-    const cleanCep = form.cep.replace(/\D/g, "");
-
-    if (cleanCep.length !== 8) {
-      setForm((prev) => ({ ...prev, cidade: "" }));
-      return;
-    }
-
-    setLoadingCep(true);
-    try {
-      const response = await fetch(
-        `https://viacep.com.br/ws/${cleanCep}/json/`,
-      );
-      const data = await response.json();
-
-      if (data.erro) {
-        setForm((prev) => ({
-          ...prev,
-          cidade: "CEP não encontrado",
-        }));
-      } else {
-        const cidadeFormatada = [
-          data.logradouro,
-          data.bairro,
-          data.localidade,
-          data.uf,
-        ]
-          .filter(Boolean)
-          .join(" | ");
-
-        setForm((prev) => ({
-          ...prev,
-          cidade: cidadeFormatada || data.localidade,
-        }));
-      }
-    } catch {
-      setForm((prev) => ({
-        ...prev,
-        cidade: "Erro ao consultar CEP",
-      }));
-    } finally {
-      setLoadingCep(false);
-    }
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setMensagem(null);
-    setLoadingSubmit(true);
-
-    try {
-      const novoPedido: Omit<Pedido, "id"> = {
-        nome: pular.nome ? "Não informado" : form.nome || "Não informado",
-        cpf: pular.cpf ? "Não informado" : form.cpf || "Não informado",
-        nivel: form.nivel,
-        pedido: pular.pedido ? "Não informado" : form.pedido || "Sem descrição",
-        cep: pular.cep
-          ? "Não informado"
-          : form.cep.replace(/\D/g, "") || "Não informado",
-        cidade: pular.cep ? "Não informado" : form.cidade || "Não informado",
-        status: "Em análise",
-      };
-
-      await createPedido(novoPedido);
-
-      setMensagem({
-        tipo: "sucesso",
-        texto: "Pedido cadastrado com sucesso!",
-      });
-
-      setForm({
-        nome: "",
-        cpf: "",
-        nivel: 3,
-        pedido: "",
-        cep: "",
-        cidade: "",
-      });
-      setPular({
-        nome: false,
-        cpf: false,
-        pedido: false,
-        cep: false,
-      });
-    } catch {
-      setMensagem({
-        tipo: "erro",
-        texto: "Erro ao cadastrar o pedido. Tente novamente.",
-      });
-    } finally {
-      setLoadingSubmit(false);
-    }
-  }
+  const {
+    form,
+    pular,
+    loadingCep,
+    loadingSubmit,
+    mensagem,
+    handleChange,
+    handlePular,
+    buscarCep,
+    handleSubmit,
+  } = useCadastroPedido();
 
   return (
-    <main className="min-h-screen bg-azul-900 flex items-center justify-center px-4 py-10 font-dunbar">
-      <div className="w-full max-w-lg bg-azul-800 rounded-2xl shadow-2xl border border-azul-600 p-8">
+    <main className="min-h-screen bg-azul-900 flex items-center justify-center px-3 py-8 font-dunbar sm:px-4 sm:py-10">
+      <div className="w-full max-w-lg bg-azul-800 rounded-2xl shadow-2xl border border-azul-600 p-5 sm:p-8">
         <h2 className="text-2xl font-bold text-white text-center mb-2">
           Cadastrar Pedido
         </h2>
-        <p className="text-slate-400 text-center text-sm mb-2">
+        <p className="text-laranja-400 text-center text-xl mb-2">
           Preencha os dados abaixo para reportar um problema no seu bairro
         </p>
-        <p className="text-slate-500 text-center text-xs mb-8">
+        <p className="mb-2 text-center text-sm text-slate-300">
+          Demonstração: use dados fictícios. Os detalhes ficam salvos apenas
+          neste navegador.
+        </p>
+        <p className="text-laranja-300 text-center text-1xl mb-8">
           Marque "Não informar" se não quiser preencher algum campo
         </p>
 
@@ -191,11 +36,11 @@ export default function CadastrarPedido() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="nome"
-                className="block text-sm font-medium text-slate-200"
+                className="block text-base font-medium text-slate-200 sm:text-lg"
               >
                 Nome Completo
               </label>
-              <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+              <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer select-none sm:gap-2 sm:text-sm">
                 <input
                   type="checkbox"
                   checked={pular.nome}
@@ -223,11 +68,11 @@ export default function CadastrarPedido() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="cpf"
-                className="block text-sm font-medium text-slate-200"
+                className="block text-base font-medium text-slate-200 sm:text-lg"
               >
                 CPF
               </label>
-              <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+              <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer select-none sm:gap-2 sm:text-sm">
                 <input
                   type="checkbox"
                   checked={pular.cpf}
@@ -254,7 +99,7 @@ export default function CadastrarPedido() {
           <div className="space-y-1.5">
             <label
               htmlFor="nivel"
-              className="block text-sm font-medium text-slate-200"
+              className="block text-base font-medium text-slate-200 sm:text-lg"
             >
               Nível de prioridade (1 a 5)
             </label>
@@ -277,7 +122,7 @@ export default function CadastrarPedido() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="pedido"
-                className="block text-sm font-medium text-slate-200"
+                className="block text-base font-medium text-slate-200 sm:text-lg"
               >
                 Descrição do problema
               </label>
@@ -305,12 +150,11 @@ export default function CadastrarPedido() {
             />
           </div>
 
-          {/* CEP */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label
                 htmlFor="cep"
-                className="block text-sm font-medium text-slate-200"
+                className="block text-base font-medium text-slate-200 sm:text-lg"
               >
                 CEP
               </label>
@@ -350,7 +194,7 @@ export default function CadastrarPedido() {
           <div className="space-y-1.5">
             <label
               htmlFor="cidade"
-              className="block text-sm font-medium text-slate-200"
+              className="block text-base font-medium text-slate-200 sm:text-lg"
             >
               Endereço / Cidade
             </label>
@@ -374,10 +218,18 @@ export default function CadastrarPedido() {
               }`}
             >
               {mensagem.texto}
+              {mensagem.tipo === "sucesso" && (
+                <Link
+                  to="/dashboard"
+                  className="mt-2 block font-bold underline"
+                >
+                  Ver no dashboard
+                </Link>
+              )}
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
             <button
               type="submit"
               disabled={loadingSubmit}

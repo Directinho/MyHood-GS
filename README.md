@@ -1,32 +1,67 @@
-# React + TypeScript + Vite
+# MyHood
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicação React para registrar problemas da comunidade e acompanhar seus pedidos.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js e npm
 
-## React Compiler
+## Executar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Verificações
+
+```bash
+npm run lint
+npm run build
+```
+
+## Organização
+
+- `src/pages` contém as telas e a apresentação.
+- `src/hooks` concentra o estado e os fluxos de interface/negócio.
+- `src/services` isola integrações externas e acesso a dados.
+- `src/components` contém componentes reutilizáveis.
+
+## API e persistência de demonstração
+
+O CRUD de pedidos consome `https://dummyjson.com/products`:
+
+- `GET /products` lista os pedidos de exemplo.
+- `POST /products/add` cria um pedido.
+- `PUT /products/{id}` atualiza um pedido.
+- `DELETE /products/{id}` remove um pedido.
+
+A DummyJSON simula as operações de escrita e não persiste alterações no servidor.
+Para que pedidos criados, editados e excluídos continuem visíveis entre telas e
+recarregamentos, a aplicação guarda essas alterações locais no `localStorage` e
+as combina com a lista remota. Os dados iniciais exibidos são produtos de
+demonstração da API.
+
+Nome, CPF, CEP, endereço e descrição completa do pedido não são enviados à
+DummyJSON; a API recebe somente metadados genéricos de demonstração. Os detalhes
+pessoais permanecem no `localStorage` deste navegador, que não é um
+armazenamento seguro. Use dados fictícios nesta versão acadêmica.
+
+Como o identificador retornado pelo `POST /products/add` não representa um
+produto persistido e não pode ser usado nos endpoints subsequentes, os pedidos
+criados localmente recebem um identificador local único e usam o produto de
+demonstração `1` como referência para as chamadas externas de atualização e
+exclusão. Isso permite exercitar todo o fluxo da aplicação sem confundir o ID
+repetido de criação da API com o identificador do pedido.
+
+O formulário também consulta o ViaCEP quando um CEP válido é informado.
+
+## Versionamento
+
+O projeto usa Git. Faça commits pequenos e descritivos, por exemplo:
+
+```text
+feat: integrar CRUD de pedidos com DummyJSON
+fix: preservar alterações locais do dashboard
+docs: explicar limites da API de demonstração
+```

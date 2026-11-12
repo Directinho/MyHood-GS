@@ -1,29 +1,38 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
-    <nav className="bg-azul-900 border-b border-azul-800">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className=" p-1.5 rounded-full transition-all duration-300 hover:bg-white/20 group-hover:scale-105">
+    <nav className="border-b border-azul-800 bg-azul-900 text-lg sm:text-xl">
+      <div className="w-full px-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-2 py-2 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0">
+          <Link to="/" className="group flex items-center gap-2 self-center sm:self-auto">
+            <div className="rounded-full p-1 transition-all duration-300 hover:bg-white/20 group-hover:scale-105">
               <img
                 src="/src/assets/favicon.png"
                 alt="Logo MyHood"
-                className="h-9 w-9 rounded-full drop-shadow-lg"
+                className="h-10 w-10 rounded-full drop-shadow-lg"
               />
             </div>
-            <p className="font-dunbar text-white font-bold text-xl tracking-tight">
+            <p className="font-dunbar text-lg font-bold tracking-tight text-white sm:text-xl">
               My
               <span className="text-laranja-500">Hood</span>
             </p>
           </Link>
-          <Link
-            to="/cadastrar-pedido"
-            className="bg-laranja-500 hover:bg-laranja-400 text-white font-dunbar font-bold px-5 py-2 rounded-lg transition-all duration-300 hover:scale-105 shadow-md"
-          >
-            Cadastrar Pedido
-          </Link>
+
+          <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
+            <Link
+              to="/cadastrar-pedido"
+              className="flex-1 rounded-lg bg-azul-500 px-2 py-2 text-center text-sm font-bold text-white shadow-md transition-all duration-300 hover:bg-blue-400 hover:text-azul-800 sm:flex-none sm:px-4 sm:text-base"
+            >
+              Cadastrar Pedido
+            </Link>
+            <Link
+              to="/login"
+              className="flex-1 rounded-lg px-2 py-2 text-center text-sm font-bold text-white shadow-md transition-all duration-300 hover:text-azul-500 sm:flex-none sm:px-4 sm:text-base"
+            >
+              Login para Administrador
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

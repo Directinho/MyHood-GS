@@ -14,38 +14,46 @@ export function usePedidos() {
 
   const fetchPedidos = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
       const data = await getPedidos();
       setPedidos(data);
-    } catch (err) {
-      setError("Não foi possível carregar os pedidos");
+      setError(null);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível carregar os pedidos.",
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchPedidos();
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    await fetchPedidos();
   }, [fetchPedidos]);
 
-  // Create
+  useEffect(() => {
+
+    void fetchPedidos();
+  }, [fetchPedidos]);
+
   const adicionarPedido = async (novoPedido: Omit<Pedido, "id">) => {
     const criado = await createPedido(novoPedido);
     setPedidos((prev) => [criado, ...prev]);
     return criado;
   };
-  // Update
   const editarPedido = async (id: number, dados: Partial<Pedido>) => {
     const atualizado = await updatePedido(id, dados);
-    setPedidos((prev) => prev.map((p) => (p.id === id ? atualizado : p)));
+    setPedidos((prev) =>
+      prev.map((pedido) => (pedido.id === id ? atualizado : pedido)),
+    );
     return atualizado;
   };
 
-  // Delete
   const removerPedido = async (id: number) => {
     await deletePedido(id);
-    setPedidos((prev) => prev.filter((p) => p.id));
+    setPedidos((prev) => prev.filter((pedido) => pedido.id !== id));
   };
   return {
     pedidos,
@@ -54,6 +62,6 @@ export function usePedidos() {
     adicionarPedido,
     editarPedido,
     removerPedido,
-    refetch: fetchPedidos,
+    refetch,
   };
 }
