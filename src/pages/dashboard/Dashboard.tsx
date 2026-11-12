@@ -18,16 +18,6 @@ function Dashboard() {
     usePedidos();
   const [erroAcao, setErroAcao] = useState<string | null>(null);
 
-  const emAnalise = pedidos.filter(
-    (pedido) => pedido.status === "Em análise",
-  ).length;
-  const emAndamento = pedidos.filter(
-    (pedido) => pedido.status === "Em andamento",
-  ).length;
-  const concluidos = pedidos.filter(
-    (pedido) => pedido.status === "Concluído",
-  ).length;
-
   async function alterarStatus(id: number, status: StatusPedido) {
     setErroAcao(null);
     try {
