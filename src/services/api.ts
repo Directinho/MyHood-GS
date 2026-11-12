@@ -129,20 +129,6 @@ function isListaProdutosApi(value: unknown): value is ListaProdutosApi {
   );
 }
 
-function mapearProduto(produto: ProdutoApi): Pedido {
-  return {
-    id: produto.id,
-    apiId: produto.id,
-    nome: produto.brand || "Não informado",
-    cpf: "Não informado",
-    nivel: Math.max(1, Math.min(5, Math.round(produto.rating ?? 3))),
-    pedido: produto.title,
-    cep: "Não informado",
-    cidade: produto.category || produto.description || "Não informado",
-    status: "Em análise",
-  };
-}
-
 function paraPayload(pedido: Omit<Pedido, "id"> | Pedido) {
   return {
     title: "Pedido comunitário MyHood",
@@ -152,33 +138,23 @@ function paraPayload(pedido: Omit<Pedido, "id"> | Pedido) {
   };
 }
 
-function mesclarPedidos(produtos: ProdutoApi[], cache: CachePedidos): Pedido[] {
+function mesclarPedidos(cache: CachePedidos): Pedido[] {
   const atualizadosPorId = new Map(
     cache.atualizados.map((pedido) => [pedido.id, pedido]),
   );
   const removidos = new Set(cache.removidos);
-  const daApi = produtos
-    .map(mapearProduto)
+  return cache.criados
     .filter((pedido) => !removidos.has(pedido.id))
     .map((pedido) => atualizadosPorId.get(pedido.id) ?? pedido);
-  const idsRemotos = new Set(produtos.map((produto) => produto.id));
-  const criadosLocais = cache.criados.filter(
-    (pedido) => !removidos.has(pedido.id) && !idsRemotos.has(pedido.id),
-  );
-
-  return [...criadosLocais, ...daApi];
 }
 
 export async function getPedidos(): Promise<Pedido[]> {
-  const [data, cache] = await Promise.all([
-    requisitar<ListaProdutosApi>(
-      `${API_URL}?limit=30`,
-      undefined,
-      isListaProdutosApi,
-    ),
-    Promise.resolve().then(lerCache),
-  ]);
-  return mesclarPedidos(data.products, cache);
+  await requisitar<ListaProdutosApi>(
+    `${API_URL}?limit=30`,
+    undefined,
+    isListaProdutosApi,
+  );
+  return mesclarPedidos(lerCache());
 }
 
 export async function createPedido(
@@ -221,12 +197,7 @@ export async function updatePedido(
     cache.atualizados.find((pedido) => pedido.id === id);
 
   if (!existente) {
-    const produto = await requisitar<ProdutoApi>(
-      `${API_URL}/${id}`,
-      undefined,
-      isProdutoApi,
-    );
-    existente = mapearProduto(produto);
+    throw new Error("Pedido não encontrado.");
   }
 
   const atualizado = {
