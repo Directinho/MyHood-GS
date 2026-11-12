@@ -119,6 +119,11 @@ function Dashboard() {
                       <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-800">
                         Prioridade {pedido.nivel}/5
                       </span>
+                      {pedido.exemplo && (
+                        <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700">
+                          Exemplo fictício
+                        </span>
+                      )}
                     </div>
                     <p className="mt-2 break-words text-sm text-slate-600">
                       {pedido.cidade}
@@ -135,12 +140,13 @@ function Dashboard() {
                     <select
                       id={`status-${pedido.id}`}
                       value={pedido.status}
+                      disabled={pedido.exemplo}
                       onChange={(event) => {
                         if (isStatusPedido(event.target.value)) {
                           void alterarStatus(pedido.id, event.target.value);
                         }
                       }}
-                      className="min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-azul-500"
+                      className="min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-azul-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {statusDisponiveis.map((status) => (
                         <option key={status} value={status}>
@@ -150,8 +156,9 @@ function Dashboard() {
                     </select>
                     <button
                       type="button"
+                      disabled={pedido.exemplo}
                       onClick={() => void excluirPedido(pedido.id)}
-                      className="rounded-lg border border-red-200 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-50"
+                      className="rounded-lg border border-red-200 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Excluir
                     </button>

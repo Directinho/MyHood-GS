@@ -10,4 +10,5 @@ export interface Pedido {
   cep: string;
   cidade: string;
   status: StatusPedido;
+  exemplo?: boolean;
 }

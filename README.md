@@ -29,12 +29,16 @@ npm run build
 
 ## API e persistência de demonstração
 
-O CRUD de pedidos consome `https://dummyjson.com/products`:
+O serviço usa `https://dummyjson.com/users` para apresentar exemplos fictícios
+de pessoas e `https://dummyjson.com/products` para demonstrar gravações:
 
-- `GET /products` lista os pedidos de exemplo.
+- `GET /users` carrega nomes e cidades fictícios para os exemplos no dashboard.
 - `POST /products/add` cria um pedido.
 - `PUT /products/{id}` atualiza um pedido.
 - `DELETE /products/{id}` remove um pedido.
+
+Os exemplos de pessoas são somente leitura; não representam pedidos realmente
+cadastrados. Os controles de status e exclusão ficam desativados nesses itens.
 
 A DummyJSON simula as operações de escrita e não persiste alterações no servidor.
 Para que pedidos criados, editados e excluídos continuem visíveis entre telas e

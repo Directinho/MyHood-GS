@@ -1,8 +1,19 @@
 import type { Pedido } from "./Pedido";
 
 const API_URL = "https://dummyjson.com/products";
+const USERS_API_URL = "https://dummyjson.com/users";
 const STORAGE_KEY = "myhood.pedidos";
 const PRODUTO_REFERENCIA_DEMO_ID = 1;
+
+interface UsuarioApi {
+  id: number;
+  firstName: string;
+  lastName: string;
+  address?: {
+    city?: string;
+    state?: string;
+  };
+}
 
 interface ProdutoApi {
   id: number;
@@ -19,8 +30,8 @@ interface CachePedidos {
   removidos: number[];
 }
 
-interface ListaProdutosApi {
-  products: ProdutoApi[];
+interface ListaUsuariosApi {
+  users: UsuarioApi[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -39,6 +50,7 @@ function isPedido(value: unknown): value is Pedido {
     typeof value.pedido === "string" &&
     typeof value.cep === "string" &&
     typeof value.cidade === "string" &&
+    (value.exemplo === undefined || typeof value.exemplo === "boolean") &&
     (value.status === "Em análise" ||
       value.status === "Em andamento" ||
       value.status === "Concluído")
@@ -121,12 +133,47 @@ async function requisitar<T>(
   return data;
 }
 
-function isListaProdutosApi(value: unknown): value is ListaProdutosApi {
+function isUsuarioApi(value: unknown): value is UsuarioApi {
   return (
     isRecord(value) &&
-    Array.isArray(value.products) &&
-    value.products.every(isProdutoApi)
+    typeof value.id === "number" &&
+    typeof value.firstName === "string" &&
+    typeof value.lastName === "string"
   );
+}
+
+function isListaUsuariosApi(value: unknown): value is ListaUsuariosApi {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.users) &&
+    value.users.every(isUsuarioApi)
+  );
+}
+
+const problemasDeExemplo = [
+  "Buraco na via pública",
+  "Manutenção da iluminação",
+  "Limpeza de área pública",
+  "Reparo de calçada",
+  "Coleta de resíduos",
+];
+
+function mapearUsuarioParaExemplo(usuario: UsuarioApi): Pedido {
+  const localidade = [usuario.address?.city, usuario.address?.state]
+    .filter(Boolean)
+    .join(" - ");
+
+  return {
+    id: -usuario.id,
+    nome: `${usuario.firstName} ${usuario.lastName}`,
+    cpf: "Não informado",
+    nivel: (usuario.id % 5) + 1,
+    pedido: problemasDeExemplo[(usuario.id - 1) % problemasDeExemplo.length],
+    cep: "Não informado",
+    cidade: localidade || "Localidade fictícia",
+    status: "Em análise",
+    exemplo: true,
+  };
 }
 
 function paraPayload(pedido: Omit<Pedido, "id"> | Pedido) {
@@ -149,12 +196,18 @@ function mesclarPedidos(cache: CachePedidos): Pedido[] {
 }
 
 export async function getPedidos(): Promise<Pedido[]> {
-  await requisitar<ListaProdutosApi>(
-    `${API_URL}?limit=30`,
-    undefined,
-    isListaProdutosApi,
-  );
-  return mesclarPedidos(lerCache());
+  const [data, cache] = await Promise.all([
+    requisitar<ListaUsuariosApi>(
+      `${USERS_API_URL}?limit=30`,
+      undefined,
+      isListaUsuariosApi,
+    ),
+    Promise.resolve().then(lerCache),
+  ]);
+  return [
+    ...mesclarPedidos(cache),
+    ...data.users.map(mapearUsuarioParaExemplo),
+  ];
 }
 
 export async function createPedido(
@@ -234,7 +287,8 @@ export async function deletePedido(id: number): Promise<void> {
   const existente =
     cache.criados.find((pedido) => pedido.id === id) ??
     cache.atualizados.find((pedido) => pedido.id === id);
-  const apiId = existente?.apiId ?? id;
+  if (!existente) throw new Error("Pedido não encontrado.");
+  const apiId = existente.apiId ?? id;
 
   await requisitar<ProdutoApi>(
     `${API_URL}/${apiId}`,
